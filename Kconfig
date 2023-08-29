@@ -1,0 +1,4 @@
+config KRealtek
+	tristate "realtek support"
+	help
+	  This adds support for the realtek.
