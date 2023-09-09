@@ -1,0 +1,4 @@
+config HAT_PACKAGE_King_PHYS
+	bool "KingPhy driver"
+	help
+		phy Driver

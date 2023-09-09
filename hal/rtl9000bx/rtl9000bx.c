@@ -1,8 +1,29 @@
-#include <linux/delay.h>
+#include "core.h"
+#include "rtl9000bx.h"
+#include "halrtl9000bxReg.h"
+
+int rtl9000bx_config_aneg(PHY_T *phydev)
+{
+	return 0;
+}
+
+int rtl9000bx_aneg_done(PHY_T *phydev)
+{
+	return 0;
+}
+
+int rtl9000bx_soft_reset(PHY_T *phydev)
+{
+	return 0;
+}
+
+int rtl9000bx_read_status(PHY_T *phydev)
+{
+	return 0;
+}
 
 
-
-int config_init(struct phy_device *phydev)
+int rtl9000bx_config_init(PHY_T *phydev)
 {
     /* The phy don't support auto-negotiation */
 	u32 features;
@@ -23,8 +44,8 @@ int config_init(struct phy_device *phydev)
 
 	delay = 4;
 	do{
-		phy_write(phydev, 0x1f, 0x0A42);
-		mdio_data = phy_read(phydev, 0x10);
+		phy_write(phydev, PAGSR, PAGEA42);
+		mdio_data = phy_read(phydev, PHYSFR);
 		if((mdio_data & 0x7) == 0x03)
 		{
 			printk("phy is ready");
@@ -36,18 +57,18 @@ int config_init(struct phy_device *phydev)
 		}
 		 mdelay(1);
 	}while(delay--);
-	phy_write(phydev, 31, 0x0A43);// 1f page select
-	phy_write(phydev, 27, 0xDC06);
-	phy_write(phydev, 28, 0xADFA);//Table 128. Parameter Setting for I/O Power Selection 
+	phy_write(phydev, PAGSR, 0x0A43);// 1f page select
+	phy_write(phydev, PHYSRAD, 0xDC06);
+	phy_write(phydev, PHYSRC, 0xADFA);//Table 128. Parameter Setting for I/O Power Selection 
 
-	phy_write(phydev, 0x1B, 0xDD00);
-	mdio_data = phy_read(phydev, 0x1c);
-	phy_write(phydev, 0x1C,(mdio_data | 0x0020));
+	phy_write(phydev, PHYSRAD, 0xDD00);
+	mdio_data = phy_read(phydev, PHYSRC);
+	phy_write(phydev, PHYSRC,(mdio_data | 0x0020));
 
 	delay = 4;
 	do{
-		phy_write(phydev, 31, 0x0A42);
-		mdio_data = phy_read(phydev, 0x10);
+		phy_write(phydev, PAGSR, PAGEA42);
+		mdio_data = phy_read(phydev, PHYSFR);
 		if((mdio_data & 0x7) == 0x03)
 		{
 			printk("phy is ready");
@@ -70,24 +91,11 @@ int config_init(struct phy_device *phydev)
 	if (err < 0)
 		return err;
 
-    phy_write(phydev, 0x1b, 0xd050);
-	adv = phy_read(phydev, 0x1C);
-	//printk("before read 0xd050 %x \n",adv);
-	phy_write(phydev, 0x1b, 0xd050);
-	adv = adv&0xe1ff;
-	adv = adv | 0x600;
-	//printk("adv: %x \n",adv);
-	phy_write(phydev,0x1C,adv);
-	phy_write(phydev, 0x1b, 0xd050);
-	adv = phy_read(phydev, 0x1C);
-	printk("after read 0xd050 %x \n",adv);
-
-
-	phy_write(phydev, 0x00, 0x8000);
+	phy_write(phydev, BMCR, 0x8000);
 
 	delay = 20;
 	do{
-		mdio_data = phy_read(phydev, 0x0);
+		mdio_data = phy_read(phydev, BMCR);
 		if(mdio_data == 0x2100)
 		{
 			printk("soft reset is ready");
